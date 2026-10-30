@@ -13,10 +13,10 @@ login_manager = LoginManager()
 csrf = CSRFProtect()
 
 
-@event.listens_for(Engine, 'connect')
+@event.listens_for(Engine, "connect")
 def configure_sqlite(connection, _):
     if isinstance(connection, sqlite3.Connection):
         cursor = connection.cursor()
-        cursor.execute('PRAGMA foreign_keys=ON')
-        cursor.execute('PRAGMA busy_timeout=5000')
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA busy_timeout=5000")
         cursor.close()
