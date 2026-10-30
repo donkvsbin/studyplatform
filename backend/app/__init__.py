@@ -28,6 +28,13 @@ def create_app(test_config=None):
     login_manager.init_app(app)
     install_errors(app)
     csrf.init_app(app)
+    from . import models  # noqa: F401 -- register migration metadata
+    from .api.auth import bp as auth_bp
+    from .cli import register_commands
+    from .services.rate_limit import RateLimiter
+    app.extensions['learnhub_limiter'] = RateLimiter()
+    app.register_blueprint(auth_bp)
+    register_commands(app)
 
     @app.get('/api/v1/health')
     def health():

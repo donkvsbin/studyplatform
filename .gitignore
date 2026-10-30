@@ -20,3 +20,4 @@ playwright-report/
 *.log
 .DS_Store
 .vscode/
+*.tsbuildinfo
