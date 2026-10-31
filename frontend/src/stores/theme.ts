@@ -1,15 +1,9 @@
 import { computed, ref, watchEffect } from "vue";
-import { parseTheme, resolveTheme, type ThemePreference } from "../utils/theme";
+import { resolveTheme, type ThemePreference } from "../utils/theme";
 
-const storageKey = "learnhub-theme";
-function savedTheme() {
-  try {
-    return parseTheme(localStorage.getItem(storageKey));
-  } catch {
-    return "system" as const;
-  }
-}
-const preference = ref<ThemePreference>(savedTheme());
+// A manual choice lasts only for this document. Every new visit starts with
+// the system appearance, including browsers with an older saved preference.
+const preference = ref<ThemePreference>("system");
 const media = window.matchMedia("(prefers-color-scheme: dark)");
 const systemDark = ref(media.matches);
 const resolved = computed(() =>
@@ -22,10 +16,6 @@ export function initTheme() {
   initialized = true;
   media.addEventListener("change", (event) => {
     systemDark.value = event.matches;
-  });
-  window.addEventListener("storage", (event) => {
-    if (event.key === storageKey || event.key === null)
-      preference.value = parseTheme(event.newValue);
   });
   watchEffect(() => {
     const root = document.documentElement;
@@ -42,13 +32,8 @@ export function initTheme() {
 }
 
 export function useTheme() {
-  function setPreference(value: ThemePreference) {
-    preference.value = value;
-    try {
-      localStorage.setItem(storageKey, value);
-    } catch {
-      /* Keep this session usable without browser storage. */
-    }
+  function toggleTheme() {
+    preference.value = resolved.value === "dark" ? "light" : "dark";
   }
-  return { preference, resolved, setPreference };
+  return { resolved, toggleTheme };
 }

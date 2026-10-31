@@ -1,9 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { resolve } from "node:path";
 
-async function theme(page: Page, value: string) {
-  await page.getByRole("button", { name: "切换主题", exact: true }).click();
-  await page.getByRole("menuitemradio", { name: value, exact: true }).click();
+async function toggleTheme(page: Page) {
+  await page.locator(".theme-trigger").click();
 }
 
 async function login(page: Page, phone: string, password: string) {
@@ -31,7 +30,7 @@ async function login(page: Page, phone: string, password: string) {
 async function snapshot(page: Page, name: string) {
   if (process.env.QA_SCREENSHOTS === "1")
     await page.screenshot({
-      path: resolve(`../.tools/qa-monochrome/${name}.png`),
+      path: resolve(`../.tools/qa-theme-icon/${name}.png`),
       fullPage: true,
       animations: "disabled",
     });
@@ -70,12 +69,16 @@ test("a single header login entry leads to login and registration with the desti
   );
 });
 
-test("theme follows system changes by default, persists overrides and can return to the system", async ({
+test("icon toggles immediately, follows the system initially and resets on every new visit", async ({
   page,
   context,
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  // A preference stored by the previous UI must not affect new visits.
+  await context.addInitScript(() =>
+    localStorage.setItem("learnhub-theme", "dark"),
+  );
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute(
@@ -83,70 +86,90 @@ test("theme follows system changes by default, persists overrides and can return
     "system",
   );
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  const trigger = page.locator(".theme-trigger");
+  await expect(trigger).toHaveText("");
+  await expect(trigger.locator("svg")).toHaveCount(1);
+  await expect(trigger).toHaveAccessibleName("切换为深色模式");
   await expect(page.locator(".course-card")).toHaveCount(3);
   await snapshot(page, "home-light-desktop");
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await snapshot(page, "home-dark-desktop");
-  await theme(page, "浅色模式");
+  await toggleTheme(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute(
-    "data-theme-preference",
-    "light",
-  );
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.goto("/courses");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  // Another tab sees and updates the saved preference, too.
-  const other = await context.newPage();
-  await other.emulateMedia({ colorScheme: "light" });
-  await other.goto("/");
-  await theme(other, "深色模式");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await other.close();
-  await theme(page, "跟随系统");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  await expect(trigger).toHaveAccessibleName("切换为深色模式");
   await page.emulateMedia({ colorScheme: "light" });
+  await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  // Internal navigation keeps the current document's manual choice.
+  await page
+    .locator(".main-nav")
+    .getByRole("link", { name: "课程列表", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/courses$/);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  expect(
+    await page.evaluate(() => localStorage.getItem("learnhub-theme")),
+  ).toBe("dark");
+  expect(
+    await page.evaluate(() => sessionStorage.getItem("learnhub-theme")),
+  ).toBeNull();
+  const other = await context.newPage();
+  await other.emulateMedia({ colorScheme: "dark" });
+  await other.goto("/");
+  await expect(other.locator("html")).toHaveAttribute(
+    "data-theme-preference",
+    "system",
+  );
+  await expect(other.locator("html")).toHaveAttribute("data-theme", "dark");
+  await other.close();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute(
     "data-theme-preference",
     "system",
   );
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await toggleTheme(page);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  // Opening a URL again also resets; it is not only a homepage behavior.
+  await page.goto("/register");
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-theme-preference",
+    "system",
+  );
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(errors).toEqual([]);
 });
 
-test("theme menu supports the keyboard and changing theme preserves form input", async ({
+test("icon button supports Enter and Space without clearing form input", async ({
   page,
 }) => {
+  await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/register");
   await page.getByLabel("怎么称呼你").fill("主题验收");
   await page.getByLabel("手机号", { exact: true }).fill("13800000201");
-  const trigger = page.getByRole("button", { name: "切换主题", exact: true });
+  const trigger = page.locator(".theme-trigger");
   await trigger.focus();
-  await page.keyboard.press("ArrowDown");
-  await expect(
-    page.getByRole("menuitemradio", { name: "跟随系统" }),
-  ).toBeFocused();
-  await page.keyboard.press("End");
-  await expect(
-    page.getByRole("menuitemradio", { name: "深色模式" }),
-  ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(trigger).toHaveAccessibleName("切换为浅色模式");
   await expect(trigger).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(trigger).toHaveAccessibleName("切换为深色模式");
   await expect(page.getByLabel("怎么称呼你")).toHaveValue("主题验收");
   await expect(page.getByLabel("手机号", { exact: true })).toHaveValue(
     "13800000201",
   );
-  await trigger.click();
-  await page.keyboard.press("Escape");
   await expect(page.getByRole("menu")).toHaveCount(0);
-  await expect(trigger).toBeFocused();
+  await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(trigger).toHaveAccessibleName("Switch to dark mode");
   await trigger.click();
-  await page.locator("h1").click();
-  await expect(page.getByRole("menu")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(trigger).toHaveAccessibleName("Switch to light mode");
 });
 
 for (const width of [375, 768, 1440]) {
@@ -217,9 +240,11 @@ for (const width of [375, 768, 1440]) {
     await page.goto("/courses/1/quiz");
     const answer = page.locator('.quiz-question input[value="a"]').first();
     await answer.check();
-    await theme(page, "浅色模式");
+    await toggleTheme(page);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await expect(answer).toBeChecked();
-    await theme(page, "深色模式");
+    await toggleTheme(page);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expect(answer).toBeChecked();
     await login(page, "13900000000", "TestAdmin123");
     for (const path of [

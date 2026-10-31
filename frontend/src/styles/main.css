@@ -1804,9 +1804,6 @@ td .text-link {
 fieldset {
   min-width: 0;
 }
-.theme-switcher {
-  position: relative;
-}
 .theme-trigger,
 .language-button {
   height: 34px;
@@ -1826,39 +1823,10 @@ fieldset {
   color: var(--text);
   background: var(--surface-subtle);
 }
-.theme-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 9px);
-  min-width: 165px;
-  padding: 5px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  background: var(--surface);
-  box-shadow: 0 8px 30px var(--shadow);
-  z-index: 40;
-}
-.theme-menu button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  border: 0;
-  border-radius: 5px;
-  background: none;
-  color: var(--muted);
-  padding: 10px;
-  font-size: 13px;
-  text-align: left;
-}
-.theme-menu button:hover,
-.theme-menu button:focus-visible,
-.theme-menu button[aria-checked="true"] {
-  background: var(--surface-subtle);
-  color: var(--text);
-}
-.theme-check {
-  margin-left: auto;
+.theme-trigger {
+  width: 34px;
+  flex-shrink: 0;
+  padding: 0;
 }
 .logout-button {
   display: inline-flex;
@@ -2065,7 +2033,6 @@ fieldset {
   background: var(--surface-subtle);
 }
 @media (max-width: 1100px) {
-  .theme-trigger > span,
   .brand-name small {
     display: none;
   }

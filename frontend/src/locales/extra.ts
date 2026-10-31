@@ -24,10 +24,8 @@ export const zhExtra = {
     coursesHint: "从基础出发，让每一课都有收获。",
   },
   theme: {
-    choose: "切换主题",
-    system: "跟随系统",
-    light: "浅色模式",
-    dark: "深色模式",
+    toLight: "切换为浅色模式",
+    toDark: "切换为深色模式",
     authArea: "登录或注册",
   },
   learning: {
@@ -185,10 +183,8 @@ export const enExtra = {
     coursesHint: "Build a solid foundation, one lesson at a time.",
   },
   theme: {
-    choose: "Change theme",
-    system: "System",
-    light: "Light mode",
-    dark: "Dark mode",
+    toLight: "Switch to light mode",
+    toDark: "Switch to dark mode",
     authArea: "Log in or sign up",
   },
   learning: {
