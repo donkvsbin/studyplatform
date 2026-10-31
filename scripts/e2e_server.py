@@ -9,6 +9,9 @@ from flask_migrate import upgrade
 from waitress import serve
 from app import create_app
 from app.services.seed import seed_demo
+from app.models import User
+from app.extensions import db
+from werkzeug.security import generate_password_hash
 
 with TemporaryDirectory(prefix="learnhub-e2e-") as directory:
     app = create_app(
@@ -22,4 +25,14 @@ with TemporaryDirectory(prefix="learnhub-e2e-") as directory:
     with app.app_context():
         upgrade()
         seed_demo()
+        # This administrator exists only in the temporary E2E database.
+        db.session.add(
+            User(
+                phone="+8613900000000",
+                nickname="E2E administrator",
+                role="admin",
+                password_hash=generate_password_hash("TestAdmin123"),
+            )
+        )
+        db.session.commit()
     serve(app, host="127.0.0.1", port=5001)

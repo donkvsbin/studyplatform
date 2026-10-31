@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookOpen, ArrowUpRight } from "lucide-vue-next";
 import { api } from "../api";
 import type { Enrollment } from "../types";
-import CourseCard from "../components/CourseCard.vue";
 import UiError from "../components/UiError.vue";
+import LearningProgress from "../components/LearningProgress.vue";
 const { t, locale } = useI18n(),
   rows = ref<Enrollment[]>([]),
-  busy = ref(true),
+  loading = ref(true),
   error = ref<unknown>(null);
 let sequence = 0;
 async function load() {
   const id = ++sequence;
-  busy.value = true;
+  loading.value = true;
   error.value = null;
   try {
     const result = await api<{ data: Enrollment[] }>("/me/enrollments");
@@ -21,16 +20,19 @@ async function load() {
   } catch (e) {
     if (id === sequence) error.value = e;
   } finally {
-    if (id === sequence) busy.value = false;
+    if (id === sequence) loading.value = false;
   }
 }
 watch(locale, load, { immediate: true });
 </script>
 <template>
-  <div class="container page learning-page">
-    <span class="section-kicker">YOUR LEARNING JOURNEY</span>
-    <h1>{{ t("catalog.myTitle") }}</h1>
-    <p class="page-subtitle">{{ t("catalog.mySub") }}</p>
+  <div class="container page">
+    <div class="page-heading">
+      <h1>{{ t("nav.learning") }}</h1>
+      <RouterLink to="/courses" class="button button-outline">{{
+        t("nav.courses")
+      }}</RouterLink>
+    </div>
     <UiError :error="error" /><button
       v-if="error"
       class="button button-outline"
@@ -38,19 +40,42 @@ watch(locale, load, { immediate: true });
     >
       {{ t("common.retry") }}
     </button>
-    <p v-if="busy" class="loading-state" role="status">
-      {{ t("common.loading") }}
-    </p>
+    <p v-if="loading" role="status">{{ t("common.loading") }}</p>
     <template v-else-if="!error"
-      ><div v-if="rows.length" class="course-grid learning-grid">
-        <div v-for="row in rows" :key="row.id">
-          <CourseCard v-if="row.available" :course="row.course" />
-          <div v-else class="panel withdrawn-course">
-            <BookOpen :size="28" />
-            <h3>{{ row.course.title }}</h3>
-            <p>{{ t("catalog.withdrawn") }}</p>
-          </div>
-          <p class="joined-date">
+      ><div v-if="rows.length" class="course-grid">
+        <article
+          v-for="row in rows"
+          :key="row.id"
+          class="panel course-card learning-card"
+        >
+          <h2>{{ row.course.title }}</h2>
+          <template v-if="row.available && row.summary"
+            ><LearningProgress :summary="row.summary" />
+            <div class="actions">
+              <RouterLink
+                v-if="row.summary.resume_lesson_id"
+                :to="`/learn/${row.course.id}/${row.summary.resume_lesson_id}`"
+                class="button"
+                >{{
+                  t(
+                    row.summary.state === "not_started"
+                      ? "simple.start"
+                      : "simple.continue",
+                  )
+                }}</RouterLink
+              ><RouterLink
+                :to="`/courses/${row.course.id}/quiz`"
+                class="text-link"
+                >{{ t("learning.quiz") }}</RouterLink
+              ><RouterLink
+                :to="`/courses/${row.course.id}`"
+                class="text-link"
+                >{{ t("catalog.detail") }}</RouterLink
+              >
+            </div></template
+          >
+          <p v-else class="notice">{{ t("catalog.withdrawn") }}</p>
+          <p class="muted small">
             {{ t("catalog.joinedOn") }}
             {{
               new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
@@ -58,15 +83,15 @@ watch(locale, load, { immediate: true });
               )
             }}
           </p>
-        </div>
+        </article>
       </div>
       <div v-else class="empty-page">
-        <div class="empty-icon"><BookOpen :size="32" /></div>
         <h2>{{ t("catalog.myEmpty") }}</h2>
         <p>{{ t("catalog.myEmptySub") }}</p>
-        <RouterLink to="/courses" class="button"
-          >{{ t("home.explore") }}<ArrowUpRight :size="17"
-        /></RouterLink></div
-    ></template>
+        <RouterLink to="/courses" class="button">{{
+          t("nav.courses")
+        }}</RouterLink>
+      </div></template
+    >
   </div>
 </template>

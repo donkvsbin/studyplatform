@@ -14,6 +14,7 @@ from ..services.catalog import (
     published_course,
     translated,
 )
+from ..services.learning import summary
 
 bp = Blueprint("courses", __name__, url_prefix="/api/v1")
 
@@ -82,6 +83,8 @@ def course_detail(course_id):
             )
         )
     )
+    if data["enrolled"]:
+        data["summary"] = summary(course, current_user.id)
     return ok(data)
 
 
@@ -141,6 +144,7 @@ def my_enrollments():
                 + ("Z" if row.joined_at.tzinfo is None else ""),
                 "available": visible,
                 "course": data,
+                "summary": summary(course, current_user.id) if visible else None,
             }
         )
     return ok(result)

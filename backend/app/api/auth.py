@@ -127,12 +127,39 @@ def change_password():
 @bp.get("/admin/stats")
 @protected(admin=True)
 def stats():
-    return ok({"users": db.session.scalar(db.select(db.func.count(User.id)))})
+    from ..models import Course, Enrollment, Category
+    from ..services.learning import summary
+    from ..services.catalog import available
+
+    enrollments = db.session.scalars(db.select(Enrollment)).all()
+    return ok(
+        {
+            "users": db.session.scalar(db.select(db.func.count(User.id))),
+            "published_courses": db.session.scalar(
+                db.select(db.func.count(Course.id))
+                .join(Category)
+                .where(
+                    Course.status == "published",
+                    Course.archived.is_(False),
+                    Category.archived.is_(False),
+                )
+            ),
+            "enrollments": len(enrollments),
+            "completed_courses": sum(
+                available(row.course)
+                and summary(row.course, row.user_id)["state"] == "completed"
+                for row in enrollments
+            ),
+        }
+    )
 
 
 @bp.patch("/admin/users/<int:user_id>/status")
 @protected(admin=True)
 def user_status(user_id):
+    from ..services.learning import lock_writes
+
+    lock_writes()
     user = db.session.get(User, user_id)
     if not user:
         raise ApiError("not_found", 404)

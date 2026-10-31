@@ -1,0 +1,10 @@
+LearnHub original demonstration video
+
+web-welcome.mp4 is an original, silent 12-second animation created for this
+project from text, rectangles and a plain background. No external video,
+images, music or recordings are included. It may be redistributed and
+modified with LearnHub.
+
+Generation source: scripts/generate_demo_video.py (requires FFmpeg only when
+regenerating). Normal installation and playback do not require FFmpeg.
+The complete educational content remains in the bilingual lesson text.

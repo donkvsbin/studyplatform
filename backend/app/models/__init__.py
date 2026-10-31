@@ -128,3 +128,106 @@ class Enrollment(db.Model):
     __table_args__ = (
         db.UniqueConstraint("user_id", "course_id", name="unique_enrollment"),
     )
+
+
+class LessonProgress(db.Model):
+    __tablename__ = "lesson_progress"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id"), nullable=False, index=True
+    )
+    lesson_id = db.Column(db.Integer, db.ForeignKey("lessons.id"), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)
+    completed_at = db.Column(db.DateTime(timezone=True))
+    video_position = db.Column(db.Float, nullable=False, default=0)
+    last_visited_at = db.Column(
+        db.DateTime(timezone=True), nullable=False, default=utcnow, index=True
+    )
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "lesson_id", name="unique_lesson_progress"),
+        db.CheckConstraint("video_position >= 0", name="nonnegative_video_position"),
+    )
+
+
+class Quiz(db.Model):
+    __tablename__ = "quizzes"
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(
+        db.Integer, db.ForeignKey("courses.id"), unique=True, nullable=False
+    )
+    title_zh = db.Column(db.String(160), nullable=False, default="结课测验")
+    title_en = db.Column(db.String(160), nullable=False, default="Course quiz")
+    pass_threshold = db.Column(db.Integer, nullable=False, default=60)
+    version = db.Column(db.Integer, nullable=False, default=1)
+    questions = db.relationship(
+        "QuizQuestion",
+        order_by="QuizQuestion.sort_order, QuizQuestion.id",
+        lazy="selectin",
+    )
+    __table_args__ = (
+        db.CheckConstraint("pass_threshold = 60", name="quiz_pass_threshold"),
+    )
+
+
+class QuizQuestion(db.Model):
+    __tablename__ = "quiz_questions"
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(
+        db.Integer, db.ForeignKey("quizzes.id"), nullable=False, index=True
+    )
+    prompt_zh = db.Column(db.Text, nullable=False)
+    prompt_en = db.Column(db.Text, nullable=False)
+    explanation_zh = db.Column(db.Text, nullable=False, default="")
+    explanation_en = db.Column(db.Text, nullable=False, default="")
+    options = db.Column(db.JSON, nullable=False)
+    correct_option_id = db.Column(db.String(12), nullable=False)
+    sort_order = db.Column(db.Integer, nullable=False, default=0)
+    archived = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class QuizAttempt(db.Model):
+    __tablename__ = "quiz_attempts"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id"), nullable=False, index=True
+    )
+    quiz_id = db.Column(
+        db.Integer, db.ForeignKey("quizzes.id"), nullable=False, index=True
+    )
+    version = db.Column(db.Integer, nullable=False)
+    submission_id = db.Column(db.String(64), nullable=False)
+    request_hash = db.Column(db.String(64), nullable=False)
+    correct_count = db.Column(db.Integer, nullable=False)
+    total_count = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Float, nullable=False)
+    passed = db.Column(db.Boolean, nullable=False)
+    context_snapshot = db.Column(db.JSON, nullable=False)
+    submitted_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
+    answers = db.relationship(
+        "QuizAttemptAnswer", order_by="QuizAttemptAnswer.id", lazy="selectin"
+    )
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id", "quiz_id", "submission_id", name="unique_quiz_submission"
+        ),
+    )
+
+
+class QuizAttemptAnswer(db.Model):
+    __tablename__ = "quiz_attempt_answers"
+    id = db.Column(db.Integer, primary_key=True)
+    attempt_id = db.Column(
+        db.Integer, db.ForeignKey("quiz_attempts.id"), nullable=False, index=True
+    )
+    question_id = db.Column(
+        db.Integer, db.ForeignKey("quiz_questions.id"), nullable=False
+    )
+    snapshot = db.Column(db.JSON, nullable=False)
+    selected_option_id = db.Column(db.String(12), nullable=False)
+    is_correct = db.Column(db.Boolean, nullable=False)
+
+
+class SeedRevision(db.Model):
+    __tablename__ = "seed_revisions"
+    name = db.Column(db.String(80), primary_key=True)
+    applied_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)

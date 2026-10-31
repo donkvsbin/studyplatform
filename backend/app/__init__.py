@@ -45,6 +45,9 @@ def create_app(test_config=None):
     from .api.assistant import bp as assistant_bp
 
     app.register_blueprint(assistant_bp)
+    from .api.learning import bp as learning_bp
+
+    app.register_blueprint(learning_bp)
     register_commands(app)
 
     @app.get("/api/v1/health")

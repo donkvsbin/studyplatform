@@ -1,11 +1,11 @@
 export default {
   nav: {
     home: "Discover",
-    courses: "Explore courses",
+    courses: "Courses",
     learning: "My learning",
     assistant: "AI study buddy",
     login: "Log in",
-    register: "Start for free",
+    register: "Sign up",
     settings: "Settings",
     logout: "Log out",
     skip: "Skip to main content",
@@ -33,9 +33,9 @@ export default {
     unavailable: "Unavailable",
   },
   auth: {
-    loginTitle: "Welcome back",
+    loginTitle: "Log in",
     loginSubtitle: "Your learning journey continues. Every small step counts.",
-    registerTitle: "A new chapter starts here",
+    registerTitle: "Create an account",
     registerSubtitle: "Create a free account. Find your first course.",
     phone: "Phone number",
     phoneHint: "Mainland China number. No SMS verification.",
@@ -65,7 +65,7 @@ export default {
     changePassword: "Change password",
     passwordChanged: "Password updated. Please log in again.",
     profile: "Your profile",
-    settingsTitle: "Make learning your own",
+    settingsTitle: "Account settings",
     settingsSub: "Manage your profile, language and account security.",
     locale: "Preferred language",
     security: "Account security",
@@ -111,7 +111,7 @@ export default {
   },
   catalog: {
     eyebrow: "A LITTLE CURIOUS? START HERE.",
-    title: "Find your next spark",
+    title: "Courses",
     subtitle:
       "Start with the basics. Build something of your own. Every course is free.",
     search: "What would you like to learn?",

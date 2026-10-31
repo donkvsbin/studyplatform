@@ -254,5 +254,8 @@ def seed_demo():
                     )
                 )
         created += 1
+    from .seed_learning import seed_learning
+
+    seed_learning()
     db.session.commit()
     return created

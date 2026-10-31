@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { safeRedirect } from "../../src/utils/navigation";
 import zh from "../../src/locales/zh-CN";
 import en from "../../src/locales/en";
+import { zhExtra, enExtra, zhErrors, enErrors } from "../../src/locales/extra";
 function keys(value: Record<string, unknown>, prefix = ""): string[] {
   return Object.entries(value)
     .flatMap(([key, item]) =>
@@ -31,5 +32,7 @@ describe("navigation and translation contracts", () => {
   });
   it("provides matching Chinese and English UI keys", () => {
     expect(keys(zh)).toEqual(keys(en));
+    expect(keys(zhExtra)).toEqual(keys(enExtra));
+    expect(keys(zhErrors)).toEqual(keys(enErrors));
   });
 });

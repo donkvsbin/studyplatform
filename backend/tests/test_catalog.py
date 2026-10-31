@@ -71,11 +71,11 @@ def test_drafts_and_lesson_bodies_are_private(seeded, client):
     detail = client.get("/api/v1/courses/2?lang=en").json["data"]
     assert detail["chapters"][0]["title"] == "Think in small instructions"
     assert "body_zh" not in str(detail) and "body_en" not in str(detail)
-    assert client.get("/api/v1/courses/2/lessons/5").status_code == 404
+    assert client.get("/api/v1/courses/2/lessons/5").status_code == 401
     register(client)
     login(client)
     assert write(client, "POST", "/courses/1/enrollment").status_code == 404
-    assert client.get("/api/v1/courses/2/lessons/5").status_code == 404
+    assert client.get("/api/v1/courses/2/lessons/5").status_code == 403
 
 
 def test_enrollment_is_idempotent_and_user_scoped(seeded, client):
