@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useAuth } from "./stores/auth";
 import UiError from "./components/UiError.vue";
+import ThemeSwitcher from "./components/ThemeSwitcher.vue";
+import { BookOpen, LogOut, Menu, X } from "lucide-vue-next";
 const { t, locale } = useI18n(),
   auth = useAuth(),
-  router = useRouter();
+  router = useRouter(),
+  route = useRoute();
 const menu = ref(false),
   error = ref<unknown>(null),
   busy = ref(false);
@@ -39,15 +42,23 @@ async function logout() {
   <a class="skip-link" href="#main">{{ t("nav.skip") }}</a>
   <header class="site-header">
     <div class="container header-inner">
-      <RouterLink to="/" class="brand"
-        >LearnHub <span v-if="locale !== 'en'">学习坊</span></RouterLink
+      <RouterLink to="/" class="brand" aria-label="LearnHub"
+        ><span class="brand-symbol"
+          ><BookOpen :size="18" aria-hidden="true" /></span
+        ><span class="brand-name"
+          >LearnHub<small v-if="locale !== 'en'">学习坊</small></span
+        ></RouterLink
       ><button
         class="mobile-toggle button button-outline"
         @click="menu = !menu"
         :aria-expanded="menu"
-        :aria-label="t('nav.menu')"
+        :aria-label="menu ? t('common.close') : t('nav.menu')"
       >
-        ☰
+        <X v-if="menu" :size="19" aria-hidden="true" /><Menu
+          v-else
+          :size="19"
+          aria-hidden="true"
+        />
       </button>
       <nav
         :class="{ open: menu }"
@@ -63,6 +74,7 @@ async function logout() {
         }}</RouterLink>
       </nav>
       <div class="nav-actions">
+        <ThemeSwitcher />
         <button
           class="language-button"
           :disabled="languageBusy || busy"
@@ -78,20 +90,33 @@ async function logout() {
             :aria-label="t('simple.account')"
             >{{ auth.user.nickname }}</RouterLink
           ><button
-            class="text-link"
+            class="text-link logout-button"
             @click="logout"
             :disabled="busy || languageBusy"
             :aria-label="t('nav.logout')"
           >
-            {{ t("nav.logout") }}
+            <LogOut :size="16" aria-hidden="true" /><span>{{
+              t("nav.logout")
+            }}</span>
           </button></template
         ><template v-else
-          ><RouterLink class="login-link" to="/login">{{
-            t("nav.login")
-          }}</RouterLink
-          ><RouterLink class="button button-small" to="/register">{{
-            t("nav.register")
-          }}</RouterLink></template
+          ><RouterLink
+            class="login-link button button-small"
+            :to="{
+              path: '/login',
+              query:
+                route.path === '/'
+                  ? {}
+                  : {
+                      redirect:
+                        route.query.redirect ||
+                        (['/login', '/register'].includes(route.path)
+                          ? undefined
+                          : route.fullPath),
+                    },
+            }"
+            >{{ t("nav.login") }}</RouterLink
+          ></template
         >
       </div>
     </div>

@@ -56,6 +56,16 @@ async function submit() {
 <template>
   <div class="container page">
     <section class="panel auth-form">
+      <nav class="auth-tabs" :aria-label="t('theme.authArea')">
+        <RouterLink
+          :to="{ path: '/login', query: { redirect: route.query.redirect } }"
+          >{{ t("nav.login") }}</RouterLink
+        >
+        <RouterLink
+          :to="{ path: '/register', query: { redirect: route.query.redirect } }"
+          >{{ t("auth.toRegister") }}</RouterLink
+        >
+      </nav>
       <h1>{{ t(register ? "auth.registerTitle" : "auth.loginTitle") }}</h1>
       <p class="muted">
         {{ t(register ? "auth.registerSubtitle" : "auth.loginSubtitle") }}
@@ -126,17 +136,6 @@ async function submit() {
           }}
         </button>
       </form>
-      <p class="auth-alternate">
-        {{ t(register ? "auth.haveAccount" : "auth.noAccount") }}
-        <RouterLink
-          :to="{
-            path: register ? '/login' : '/register',
-            query: { redirect: route.query.redirect },
-          }"
-          class="text-link"
-          >{{ t(register ? "auth.toLogin" : "auth.toRegister") }}</RouterLink
-        >
-      </p>
       <p class="muted small">
         {{ t(register ? "auth.privacy" : "auth.forgot") }}
       </p>

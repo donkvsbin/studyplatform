@@ -6,6 +6,13 @@ import { useAuth } from "../stores/auth";
 import type { Course, Enrollment } from "../types";
 import CourseCard from "../components/CourseCard.vue";
 import UiError from "../components/UiError.vue";
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCheck,
+  Code2,
+  MessageCircle,
+} from "lucide-vue-next";
 const { t, locale } = useI18n(),
   auth = useAuth(),
   courses = ref<Course[]>([]),
@@ -38,20 +45,62 @@ watch([locale, () => auth.user?.id], load, { immediate: true });
 </script>
 <template>
   <div class="container page home-page">
-    <section class="welcome-panel">
-      <h1>{{ t("simple.home") }}</h1>
-      <p>{{ t("simple.intro") }}</p>
-      <div class="actions">
-        <RouterLink class="button" to="/courses">{{
-          t("nav.courses")
-        }}</RouterLink
-        ><RouterLink class="button button-outline" to="/my-learning">{{
-          t("nav.learning")
-        }}</RouterLink
-        ><RouterLink class="text-link" to="/assistant"
-          >{{ t("nav.assistant") }} →</RouterLink
-        >
+    <section class="home-hero">
+      <div class="hero-copy">
+        <p class="hero-eyebrow">{{ t("simple.eyebrow") }}</p>
+        <h1>{{ t("simple.headline") }}</h1>
+        <p class="hero-description">{{ t("simple.intro") }}</p>
+        <div class="actions hero-actions">
+          <RouterLink class="button" to="/courses"
+            >{{ t("simple.start") }}<ArrowRight :size="17" aria-hidden="true"
+          /></RouterLink>
+          <RouterLink class="button button-outline" to="/my-learning">{{
+            t("nav.learning")
+          }}</RouterLink>
+        </div>
       </div>
+      <aside class="learning-guide" :aria-label="t('simple.guide')">
+        <div class="guide-heading">
+          <BookOpen :size="20" aria-hidden="true" />
+          <h2>{{ t("simple.guide") }}</h2>
+        </div>
+        <p class="muted guide-intro">{{ t("simple.guideHint") }}</p>
+        <ol class="guide-steps">
+          <li>
+            <span class="step-icon"
+              ><Code2 :size="18" aria-hidden="true"
+            /></span>
+            <div>
+              <h3>{{ t("simple.stepCourse") }}</h3>
+              <p>{{ t("simple.stepCourseHint") }}</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-icon"
+              ><BookOpen :size="18" aria-hidden="true"
+            /></span>
+            <div>
+              <h3>{{ t("simple.stepLesson") }}</h3>
+              <p>{{ t("simple.stepLessonHint") }}</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-icon"
+              ><CheckCheck :size="18" aria-hidden="true"
+            /></span>
+            <div>
+              <h3>{{ t("simple.stepQuiz") }}</h3>
+              <p>{{ t("simple.stepQuizHint") }}</p>
+            </div>
+          </li>
+        </ol>
+        <RouterLink class="guide-assistant" to="/assistant"
+          ><MessageCircle :size="16" aria-hidden="true" /><span>{{
+            t("simple.assistantHint")
+          }}</span
+          ><ArrowRight :size="16" aria-hidden="true"
+        /></RouterLink>
+      </aside>
     </section>
     <UiError :error="error" /><button
       v-if="error"
@@ -82,7 +131,12 @@ watch([locale, () => auth.user?.id], load, { immediate: true });
     </section>
     <section class="section">
       <div class="page-heading">
-        <h2>{{ t("simple.recommended") }}</h2>
+        <div>
+          <h2>{{ t("simple.recommended") }}</h2>
+          <p class="muted small section-description">
+            {{ t("simple.coursesHint") }}
+          </p>
+        </div>
         <RouterLink to="/courses" class="text-link"
           >{{ t("simple.viewCourses") }} →</RouterLink
         >
