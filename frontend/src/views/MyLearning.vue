@@ -29,9 +29,14 @@ watch(locale, load, { immediate: true });
   <div class="container page">
     <div class="page-heading">
       <h1>{{ t("nav.learning") }}</h1>
-      <RouterLink to="/courses" class="button button-outline">{{
-        t("nav.courses")
-      }}</RouterLink>
+      <div class="actions">
+        <RouterLink to="/results" class="button button-outline">{{
+          t("learning.history")
+        }}</RouterLink
+        ><RouterLink to="/courses" class="button button-outline">{{
+          t("nav.courses")
+        }}</RouterLink>
+      </div>
     </div>
     <UiError :error="error" /><button
       v-if="error"

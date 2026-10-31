@@ -11,6 +11,8 @@ export const zhExtra = {
     account: "账号设置",
   },
   learning: {
+    scoreLabel: "成绩",
+    submittedAt: "提交时间",
     title: "课程学习",
     progress: "学习进度",
     done: "已完成 {done} / {total} 课时",
@@ -151,6 +153,8 @@ export const enExtra = {
     account: "Account settings",
   },
   learning: {
+    scoreLabel: "Score",
+    submittedAt: "Submitted",
     title: "Course learning",
     progress: "Learning progress",
     done: "{done} of {total} lessons completed",

@@ -16,6 +16,11 @@ export const router = createRouter({
     },
     { path: "/assistant", component: () => import("../views/Assistant.vue") },
     {
+      path: "/results",
+      component: () => import("../views/Results.vue"),
+      meta: { auth: true },
+    },
+    {
       path: "/learn/:courseId/:lessonId",
       component: () => import("../views/Learn.vue"),
       meta: { auth: true },

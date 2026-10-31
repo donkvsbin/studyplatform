@@ -46,6 +46,7 @@ test("register, log in, enroll, refresh, change language and log out", async ({
   await page.getByRole("link", { name: "已加入学习" }).click();
   await expect(page.locator(".course-card")).toHaveCount(1);
   await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(page.getByRole("button", { name: "切换为中文" })).toBeEnabled();
   await expect(
     page.getByRole("heading", { name: "Web Foundations" }),
   ).toBeVisible();
@@ -81,6 +82,7 @@ test("catalog search, filters, empty state and bilingual details", async ({
   await page.goto("/courses/1");
   await expect(page.locator(".chapter-panel")).toHaveCount(2);
   await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(page.getByRole("button", { name: "切换为中文" })).toBeEnabled();
   await expect(
     page.getByRole("heading", { name: "Web Foundations", exact: true }),
   ).toBeVisible();

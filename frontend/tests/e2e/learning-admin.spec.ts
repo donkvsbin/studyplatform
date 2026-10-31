@@ -89,6 +89,7 @@ test("lessons, video resume, quiz retry, bilingual answers and completion", asyn
       .locator('input[value="a"]')
       .check();
   await page.getByRole("button", { name: "Switch to English" }).click();
+  await expect(page.getByRole("button", { name: "切换为中文" })).toBeEnabled();
   await expect(
     page.getByRole("button", { name: "Submit answers" }),
   ).toBeVisible();
@@ -97,6 +98,9 @@ test("lessons, video resume, quiz retry, bilingual answers and completion", asyn
       page.locator(".quiz-question").nth(i).locator('input[value="a"]'),
     ).toBeChecked();
   await page.getByRole("button", { name: "切换为中文" }).click();
+  await expect(
+    page.getByRole("button", { name: "Switch to English" }),
+  ).toBeEnabled();
   await page.getByRole("button", { name: "提交答案" }).click();
   await expect(page.locator(".result-summary")).toContainText("尚未通过");
   await page.getByRole("button", { name: "重新作答" }).click();
@@ -215,8 +219,14 @@ test("administrator creates bilingual content, validates publishing and preserve
     await page.getByLabel("英文解析").fill("B is correct.");
     if (i === 2) {
       await page.getByRole("button", { name: "Switch to English" }).click();
+      await expect(
+        page.getByRole("button", { name: "切换为中文" }),
+      ).toBeEnabled();
       await expect(page.getByLabel("Chinese question")).toHaveValue("题目2");
       await page.getByRole("button", { name: "切换为中文" }).click();
+      await expect(
+        page.getByRole("button", { name: "Switch to English" }),
+      ).toBeEnabled();
     }
     await page
       .locator(".inline-editor")
@@ -240,12 +250,29 @@ test("administrator creates bilingual content, validates publishing and preserve
   await expect(student.locator(".markdown-text")).toContainText(
     "完整的课时正文",
   );
+  await student.goto(`/courses/${courseId}/quiz`);
+  await expect(student.locator(".quiz-question")).toHaveCount(3);
+  for (let i = 0; i < 3; i++)
+    await student
+      .locator(".quiz-question")
+      .nth(i)
+      .locator('input[value="b"]')
+      .check();
+  await student.getByRole("button", { name: "提交答案" }).click();
+  await expect(student.locator(".result-summary")).toContainText("测验通过");
   await page.getByRole("button", { name: "下架课程", exact: true }).click();
   await expect(page.locator(".status-chip")).toHaveText("已下架");
   await student.reload();
   await expect(student.getByRole("alert")).toContainText("课程不存在或已下架");
   await student.goto("/my-learning");
   await expect(student.getByText("课程已下架，学习记录保留")).toBeVisible();
+  await student.getByRole("link", { name: "成绩记录", exact: true }).click();
+  await student.getByRole("button", { name: "查看结果", exact: true }).click();
+  await expect(student.locator(".answer-review")).toHaveCount(3);
+  await expect(student.locator(".answer-review").first()).toContainText(
+    "B 是正确选项",
+  );
+  await student.goto("/my-learning");
   await page.goto("/admin/users");
   await page.getByLabel("搜索昵称或手机号").fill("停用验收学员");
   await page.getByRole("button", { name: "搜索", exact: true }).click();
@@ -287,6 +314,7 @@ for (const width of [375, 768, 1440]) {
       "/courses/1/quiz",
       "/my-learning",
       "/settings",
+      "/results",
     ]) {
       await page.goto(path);
       await expect(page.locator("h1")).toBeVisible();
@@ -298,11 +326,15 @@ for (const width of [375, 768, 1440]) {
       ).toBe(false);
     }
     await page.getByRole("button", { name: "Switch to English" }).click();
+    await expect(
+      page.getByRole("button", { name: "切换为中文" }),
+    ).toBeEnabled();
     for (const path of [
       "/learn/1/1",
       "/courses/1/quiz",
       "/my-learning",
       "/settings",
+      "/results",
     ]) {
       await page.goto(path);
       await expect(page.locator("h1")).toBeVisible();
@@ -314,6 +346,9 @@ for (const width of [375, 768, 1440]) {
       ).toBe(false);
     }
     await page.getByRole("button", { name: "切换为中文" }).click();
+    await expect(
+      page.getByRole("button", { name: "Switch to English" }),
+    ).toBeEnabled();
     await page.getByRole("button", { name: "退出登录", exact: true }).click();
     await expect(
       page.getByRole("button", { name: "退出登录", exact: true }),
@@ -339,6 +374,9 @@ for (const width of [375, 768, 1440]) {
       ).toBe(false);
     }
     await page.getByRole("button", { name: "Switch to English" }).click();
+    await expect(
+      page.getByRole("button", { name: "切换为中文" }),
+    ).toBeEnabled();
     for (const path of [
       "/admin",
       "/admin/courses",
@@ -358,6 +396,9 @@ for (const width of [375, 768, 1440]) {
       ).toBe(false);
     }
     await page.getByRole("button", { name: "切换为中文" }).click();
+    await expect(
+      page.getByRole("button", { name: "Switch to English" }),
+    ).toBeEnabled();
     expect(errors).toEqual([]);
   });
 }

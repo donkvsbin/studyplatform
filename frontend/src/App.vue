@@ -10,12 +10,17 @@ const { t, locale } = useI18n(),
 const menu = ref(false),
   error = ref<unknown>(null),
   busy = ref(false);
+const languageBusy = ref(false);
 async function language() {
+  if (languageBusy.value) return;
+  languageBusy.value = true;
   try {
     error.value = null;
     await auth.switchLocale(locale.value === "en" ? "zh-CN" : "en");
   } catch (e) {
     error.value = e;
+  } finally {
+    languageBusy.value = false;
   }
 }
 async function logout() {
@@ -60,6 +65,8 @@ async function logout() {
       <div class="nav-actions">
         <button
           class="language-button"
+          :disabled="languageBusy || busy"
+          :aria-busy="languageBusy"
           @click="language"
           :aria-label="locale === 'en' ? '切换为中文' : 'Switch to English'"
         >
@@ -73,7 +80,7 @@ async function logout() {
           ><button
             class="text-link"
             @click="logout"
-            :disabled="busy"
+            :disabled="busy || languageBusy"
             :aria-label="t('nav.logout')"
           >
             {{ t("nav.logout") }}
