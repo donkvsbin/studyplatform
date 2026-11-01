@@ -1,6 +1,19 @@
 # LearnHub · 学习坊
 
+**简体中文** | [English](README.en.md)
+
 免费的中英文编程学习平台，Vue 3 + TypeScript + Flask + SQLite。支持课程浏览、手机号注册登录、课时学习、进度保存、视频续播、结课测验与成绩记录、管理后台和 DeepSeek 学习助手。界面采用黑白配色，右上角“登录”内可以切换注册。每次打开或刷新网站时，主题跟随系统；点击右上角太阳/月亮图标可直接切换深浅色，手动选择只在当前页面会话内生效。
+
+## 下载
+
+在 [GitHub 仓库](https://github.com/donkvsbin/studyplatform) 点击 **Code → Download ZIP**，或使用 Git：
+
+```powershell
+git clone https://github.com/donkvsbin/studyplatform.git
+cd studyplatform
+```
+
+下载或解压后，进入项目根目录，按下方步骤安装依赖并在本机启动网站。
 
 ## Windows 启动
 
@@ -85,4 +98,4 @@ SQLite 固定在 `backend/instance/learnhub.db`，不依赖启动目录。备份
 
 macOS/Linux：在 backend 执行 `python3.14 -m venv .venv`、`.venv/bin/python -m pip install -r requirements.txt`、复制 `.env.example` 为 `.env`、`db upgrade`、`seed-demo`；frontend 执行 `npm ci && npm run build`；然后从 backend 执行 `.venv/bin/python run.py`。此流程尚待对应操作系统实测。
 
-本机详细检查与交接记录保存在 `docs/`，按用户要求不加入 Git。本项目尚未发布到公网，朋友电脑需在目标机实际验收。
+源码已发布在 [GitHub](https://github.com/donkvsbin/studyplatform)。下载后按上述步骤在本机运行；每台电脑需要独立安装依赖并验证启动。
