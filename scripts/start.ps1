@@ -1,4 +1,6 @@
+param([int]$Port = 0)
 . "$PSScriptRoot\runtime.ps1"
+if ($Port -ne 0) { $env:LEARNHUB_PORT = [string]$Port }
 $venvPython = Join-Path $ProjectRoot 'backend\.venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $venvPython)) { throw 'Run setup.bat or scripts/setup.ps1 first.' }
 Push-Location (Join-Path $ProjectRoot 'backend')
@@ -10,7 +12,6 @@ Push-Location (Join-Path $ProjectRoot 'frontend')
 try { npm.cmd run build; Assert-Success } finally { Pop-Location }
 Push-Location (Join-Path $ProjectRoot 'backend')
 try {
-    Write-Output 'LearnHub: http://127.0.0.1:5000 (Ctrl+C to stop)'
-    & '.\.venv\Scripts\waitress-serve.exe' --host=127.0.0.1 --port=5000 --call app:create_app
+    & $venvPython run.py
     Assert-Success
 } finally { Pop-Location }

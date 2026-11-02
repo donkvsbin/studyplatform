@@ -33,6 +33,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1
 
 浏览器访问 http://127.0.0.1:5000 。保持终端打开，Ctrl+C 停止。启动脚本执行迁移和幂等课程初始化，再构建前端、启动 Waitress。现有账号、进度、成绩和人工编辑不会被清空。
 
+如果提示端口被占用，或启动后浏览器显示普通的 “Not Found” 页面，请停止当前终端中的服务（Ctrl+C），换端口启动：
+
+```powershell
+.\start.bat -Port 5002
+```
+
+然后访问 http://127.0.0.1:5002 。也可运行 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1 -Port 5002`。PyCharm 中可在运行配置的环境变量里设置 `LEARNHUB_PORT=5002`。新版启动入口会拒绝使用已占用的端口，避免访问到其他程序。
+
 也可用 PyCharm 打开整个项目，解释器选择 `backend/.venv/Scripts/python.exe`。先运行一次 start.bat 生成前端构建，再停止服务；之后右键 `backend/run.py` → Run，即可通过同一地址启动。修改前端代码后需重新构建或使用开发模式。
 
 ## 管理员与账号

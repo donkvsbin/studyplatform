@@ -35,6 +35,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1
 
 Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser. Keep the terminal open; press Ctrl+C to stop the server. The startup script runs database migrations, initializes demo courses without overwriting existing content, builds the frontend, and starts Waitress. Existing accounts, progress, results, and manual edits are preserved.
 
+If the port is unavailable, or the browser shows a plain "Not Found" page after startup, stop the current server with Ctrl+C and choose another port:
+
+```powershell
+.\start.bat -Port 5002
+```
+
+Then open [http://127.0.0.1:5002](http://127.0.0.1:5002). You can also run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1 -Port 5002`. In PyCharm, set `LEARNHUB_PORT=5002` in the run configuration's environment variables. The updated startup entry rejects occupied ports so it cannot silently share a port with another application.
+
 You can also open the entire project in PyCharm and select `backend/.venv/Scripts/python.exe` as the interpreter. Run `start.bat` once to build the frontend, then stop the server. Right-click `backend/run.py` and select **Run** to start the app at the same address. After changing frontend code, rebuild it or use development mode.
 
 ## Accounts and administration
